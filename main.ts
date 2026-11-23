@@ -8,6 +8,7 @@ import { dirname } from "node:path";
 // --- Named constants (authorship / gate) ---
 const EMOJI = "🤗"; // U+1F917 HUGGING FACE
 const OUTPUT_PATH = "/output/entry.txt";
+const ENCODING = "utf8" as const;
 const MIN_CHARS = 1;
 const MAX_CHARS = 8;
 
@@ -24,11 +25,18 @@ function assertValidEntry(value: string): void {
   }
 }
 
-function main(): void {
-  assertValidEntry(EMOJI);
+// Deterministic write: same input always yields the same bytes.
+// We write the raw string with ENCODING and never append a newline,
+// so the file content is byte-for-byte identical on every run.
+function writeEntry(value: string): void {
   mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
   // No trailing newline, no extra spaces, no other text.
-  writeFileSync(OUTPUT_PATH, EMOJI, { encoding: "utf8" });
+  writeFileSync(OUTPUT_PATH, value, { encoding: ENCODING });
+}
+
+function main(): void {
+  assertValidEntry(EMOJI);
+  writeEntry(EMOJI);
 }
 
 main();
